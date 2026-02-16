@@ -76,25 +76,24 @@ export default function App() {
   };
 
   const options = {
-    method: "GET",
-    url: `https://us-sales-tax-rates.p.rapidapi.com/tax/${zip}`,
+    method: 'GET',
+    url: `https://retrieveustaxrate.p.rapidapi.com/GetTaxRateByZip?zip=${zip}`,
     headers: {
-      "X-RapidAPI-Key": "fc253d3d50msh904d92d7fca9a2cp10a84cjsnf485d1c60b91",
-      "X-RapidAPI-Host": "us-sales-tax-rates.p.rapidapi.com",
-    },
-  };
-
-
-  const getZipAPI = async () => {
-    try {
-      const res = await axios.request(options);
-      setSalesTax(parseFloat(res.data.data.state_rate) + 1);
-
-
-    } catch (err) {
-      alert("Zip Code Does Not Exist!!!");
+      'x-rapidapi-key': 'fc253d3d50msh904d92d7fca9a2cp10a84cjsnf485d1c60b91',
+      'x-rapidapi-host': 'retrieveustaxrate.p.rapidapi.com',
+      Authorization: 'Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw=='
     }
   };
+
+
+  async function getZipAPI() {
+    try {
+      const response = await axios.request(options);
+      setSalesTax(parseFloat(response.data.TaxRate) + 1);
+    } catch (error) {
+      alert("Zip Code Does Not Exist!!!!");
+    }
+  }
 
   const checkZip = () => {
     if (zip.length === 5) {
