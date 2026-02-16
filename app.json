@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "expense",
-    "slug": "expense",
+    "slug": "expense-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F9E79F"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -25,6 +25,21 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "81313632-102f-4d0b-89b6-4557efdefa5c"
+      }
+    },
+    "owner": "rach18731943",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/81313632-102f-4d0b-89b6-4557efdefa5c"
     }
   }
 }
