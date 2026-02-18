@@ -1,4 +1,4 @@
-import React from "react";
+import Dialog from "react-native-dialog";
 
 const DialogContainer = (props) => {
   return (
@@ -7,16 +7,14 @@ const DialogContainer = (props) => {
       <Dialog.Input
         autoCapitalize="none"
         placeholder="Name of item"
-        onChangeText={props.placeholderOneFunc}
+        r
+        onChangeText={props.item}
       />
-      <Dialog.Input
-        placeholder="Quantity"
-        onChangeText={props.placeHolderTwoFunc}
-      />
+      <Dialog.Input placeholder="Quantity" onChangeText={props.qty} />
       <Dialog.Input
         inputMode="decimal"
         placeholder="Price"
-        onChangeText={props.placeHolderThreeFunc}
+        onChangeText={props.price}
       />
       <Dialog.Button
         label={props.buttonOneLabel}
