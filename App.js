@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Alert, Modal } from 'react-native';
+import './global.css';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { s } from './App.style';
 import { Icons } from './components/Icons/Icons';
 import { Food } from './components/Food/Food';
@@ -12,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native';
 import { ModalComponent } from './components/Modal';
+import ModalContainer from "./components/ModalContainer";
 
 
 
@@ -237,25 +239,61 @@ export default function App() {
           />)}
       </ScrollView>
       {/*//! Add a note container*/}
-      <Dialog.Container visible={isDialogVisible}>
+      {/* <Dialog.Container visible={isDialogVisible}>
         <Dialog.Title>Add Note</Dialog.Title>
         <Dialog.Input autoCapitalize="none" placeholder='Name of Item...' onChangeText={(txt) => setNote({ ...note, title: txt })} />
         <Dialog.Input placeholder='Quantity' onChangeText={(qty) => setNote({ ...note, qty: qty })} />
         <Dialog.Input inputMode='decimal' placeholder='Price' onChangeText={(amount) => setNote({ ...note, price: +amount })} />
         <Dialog.Button label="Add" onPress={() => addNote()} />
         <Dialog.Button label="Cancel" onPress={() => toggle()} />
-      </Dialog.Container>
+      </Dialog.Container> */}
+      <Modal visible={isDialogVisible} transparent={true} animationType="fade">
+        <View className='flex-1 items-center justify-center bg-black opacity-70'>
+          <View className='w-96 bg-white rounded-md'>
+            <Text className='text-center text-2xl underline'>Add Note</Text>
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Name of Item" onChangeText={(txt) => setNote({ ...note, title: txt })} />
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Quantity" keyboardType="numeric" onChangeText={(qty) => setNote({ ...note, qty: qty })} />
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Price" keyboardType="decimal-pad" onChangeText={(price) => setNote({ ...note, price: price })} />
+          </View>
+          <View className='flex-row gap-2 mt-2'>
+            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => addNote()}>
+              <Text>Add</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={() => toggle()}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {/*//! Edit Dialog Box*/}
-      <Dialog.Container visible={isEditVisible}>
+      {/* <Dialog.Container visible={isEditVisible}>
         <Dialog.Title>Change Note</Dialog.Title>
         <Dialog.Input autoCapitalize="none" placeholder='Name...' onChangeText={(txt) => setNote({ ...note, title: txt })} />
         <Dialog.Input placeholder='Quantity' onChangeText={(qty) => setNote({ ...note, qty: qty })} />
         <Dialog.Input inputMode='decimal' placeholder='Price' onChangeText={(amount) => setNote({ ...note, price: +amount })} />
         <Dialog.Button label="Update" onPress={() => updateNote()} />
         <Dialog.Button label="Cancel" onPress={() => setEditVisible(!isEditVisible)} />
-      </Dialog.Container>
+      </Dialog.Container> */}
+      <Modal visible={isEditVisible} transparent={true} animationType="fade">
+        <View className='flex-1 items-center justify-center bg-black opacity-70'>
+          <View className='w-96 bg-white rounded-md'>
+            <Text className='text-center text-2xl underline'>Change Note</Text>
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Name..." onChangeText={(txt) => setNote({ ...note, title: txt })} />
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Quantity" keyboardType="numeric" onChangeText={(qty) => setNote({ ...note, qty: qty })} />
+            <TextInput className='border-b p-2 outline-none border-black' placeholder="Price" keyboardType="decimal-pad" onChangeText={(price) => setNote({ ...note, price: +price })} />
+          </View>
+          <View className='flex-row gap-2 mt-2'>
+            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => updateNote()}>
+              <Text>Add</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={() => setEditVisible(!isEditVisible)}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {/*//! zipcode box*/}
-      <Dialog.Container visible={zipDialog}>
+      {/* <Dialog.Container visible={zipDialog}>
         <Dialog.Title>Enter Zip Code</Dialog.Title>
         <Dialog.Input
           placeholder='Zip Code ex:90210'
@@ -266,7 +304,24 @@ export default function App() {
         <Dialog.Button label="Cancel" onPress={() => setZipDialog(!zipDialog)} />
         <Dialog.Button label="Enter" onPress={checkZip}
         />
-      </Dialog.Container>
+      </Dialog.Container> */}
+      <Modal visible={zipDialog} transparent={true} animationType="fade">
+        <View className='flex-1 items-center justify-center bg-black opacity-70'>
+          <View className='w-96 bg-white rounded-md'>
+            <Text className='text-center text-2xl underline'>Enter Zip Code</Text>
+            <TextInput keyboardType="numeric" maxLength={5} className='border-b p-2 outline-none border-black' placeholder="Zip Code" onChangeText={(zipCode) => setZip(zipCode)} />
+          </View>
+          <View className='flex-row gap-2 mt-2'>
+            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => setZipDialog(!zipDialog)}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={checkZip}>
+              <Text>Enter</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/*//! add button to create notes*/}
       <AddIcon onPress={() => toggle()} />
       {/*//! modal*/}
