@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
   TextInput,
+  Platform,
 } from "react-native";
 import { s } from "./App.style";
 import { Icons } from "./components/Icons/Icons";
@@ -26,6 +27,8 @@ import ModalContainer from "./components/ModalContainer";
 import ModalZipContainer from "./components/ModalZipContainer";
 import DialogContainer from "./components/DialogContainer";
 import DialogZipContainer from "./components/DialogZipContainer";
+import Swal from "sweetalert2";
+import DeleteAllNotesModal from "./components/DeleteAllNotesModal";
 
 let isFirstRender = true;
 
@@ -43,6 +46,7 @@ export default function App() {
     qty: 0,
   });
   const [isEditVisible, setEditVisible] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
 
   useEffect(() => {
     loadNotes();
@@ -136,28 +140,34 @@ export default function App() {
     }
   };
 
-  const deleteAllNotes = () => {
-    const removeAsyncStorage = async () => {
-      try {
-        await AsyncStorage.removeItem("@notes");
-        await AsyncStorage.removeItem("@salestax");
-        setNoteArray(noteArray.filter((x) => x.id === 0));
-        setSalesTax(0);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  const removeAsyncStorage = async () => {
+    try {
+      await AsyncStorage.removeItem("@notes");
+      await AsyncStorage.removeItem("@salestax");
+      setNoteArray(noteArray.filter((x) => x.id === 0));
+      setSalesTax(0);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setDeleteModal(false);
+    }
+  };
 
-    Alert.alert("Warning", "This action will remove all notes!!", [
-      {
-        text: "Remove All",
-        style: "destructive",
-        onPress: () => removeAsyncStorage(),
-      },
-      {
-        text: "Cancel",
-      },
-    ]);
+  const deleteAllNotes = () => {
+    if (Platform.OS !== "web") {
+      Alert.alert("Warning", "This action will remove all notes!!", [
+        {
+          text: "Remove All",
+          style: "destructive",
+          onPress: () => removeAsyncStorage(),
+        },
+        {
+          text: "Cancel",
+        },
+      ]);
+    } else {
+      setDeleteModal(true);
+    }
   };
 
   const getTotal = () => {
@@ -210,6 +220,79 @@ export default function App() {
     });
   };
 
+  const renderDialog = () => {
+    if (Platform.OS !== "web") {
+      return (
+        <>
+          <DialogContainer
+            isDialogVisible={isDialogVisible}
+            title="Add Note"
+            item={(txt) => setNote({ ...note, title: txt })}
+            qty={(qty) => setNote({ ...note, qty: qty })}
+            price={(amount) => setNote({ ...note, price: +amount })}
+            buttonOneLabel="Add"
+            buttonFuncOne={() => addNote()}
+            buttonFuncTwo={() => toggle()}
+          />
+          <DialogContainer
+            isDialogVisible={isEditVisible}
+            title="Change Note"
+            item={(txt) => setNote({ ...note, title: txt })}
+            qty={(qty) => setNote({ ...note, qty: qty })}
+            price={(amount) => setNote({ ...note, price: +amount })}
+            buttonOneLabel="Change"
+            buttonFuncOne={() => updateNote()}
+            buttonFuncTwo={() => setEditVisible(!isEditVisible)}
+          />
+          <DialogZipContainer
+            zipDialog={zipDialog}
+            zipFunc={(zipCode) => setZip(zipCode)}
+            zipCancel={() => setZipDialog(!zipDialog)}
+            zipEnter={checkZip}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <ModalContainer
+            isDialogVisible={isDialogVisible}
+            title="Add Note"
+            item={(txt) => setNote({ ...note, title: txt })}
+            qty={(qty) => setNote({ ...note, qty: qty })}
+            price={(price) => setNote({ ...note, price: +price })}
+            buttonTitleOne="Add"
+            buttonFuncOne={() => addNote()}
+            buttonTitleTwo="Cancel"
+            buttonFuncTwo={() => toggle()}
+          />
+          <ModalContainer
+            isDialogVisible={isEditVisible}
+            title="Change Note"
+            item={(title) => setNote({ ...note, title: title })}
+            qty={(qty) => setNote({ ...note, qty: qty })}
+            price={(price) => setNote({ ...note, price: +price })}
+            buttonTitleOne="Change"
+            buttonFuncOne={() => updateNote()}
+            buttonTitleTwo="Cancel"
+            buttonFuncTwo={() => setEditVisible(!isEditVisible)}
+          />
+          <ModalZipContainer
+            zipDialog={zipDialog}
+            zipInput={(zipCode) => setZip(zipCode)}
+            zipFuncCancel={() => setZipDialog(!zipDialog)}
+            zipGetZipCode={checkZip}
+          />
+          <DeleteAllNotesModal
+            show={deleteModal}
+            delete={removeAsyncStorage}
+            cancel={() => setDeleteModal(false)}
+          />
+        </>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={s.root}>
       <Icons
@@ -229,65 +312,7 @@ export default function App() {
           />
         ))}
       </ScrollView>
-      {/*//! Add a note container*/}
-      {/* <DialogContainer
-        isDialogVisible={isDialogVisible}
-        title="Add Note"
-        placeholderOneFunc={(txt) => setNote({ ...note, title: txt })}
-        placeholderTwoFunc={(qty) => setNote({ ...note, qty: qty })}
-        placeholderThreeFunc={(amount) => setNote({ ...note, price: +amount })}
-        buttonOneLabel="Add"
-        buttonFuncOne={() => addNote()}
-        buttonFuncTwo={() => toggle()}
-      /> */}
-      <ModalContainer
-        isDialogVisible={isDialogVisible}
-        title="Add Note"
-        item={(txt) => setNote({ ...note, title: txt })}
-        qty={(qty) => setNote({ ...note, qty: qty })}
-        price={(price) => setNote({ ...note, price: +price })}
-        buttonTitleOne="Add"
-        buttonFuncOne={() => addNote()}
-        buttonTitleTwo="Cancel"
-        buttonFuncTwo={() => toggle()}
-      />
-      {/*//! Edit Dialog Box*/}
-      {/* <DialogContainer
-        isDialogVisible={isEditVisible}
-        title="Add Note"
-        placeholderOneFunc={(txt) => setNote({ ...note, title: txt })}
-        placeholderTwoFunc={(qty) => setNote({ ...note, qty: qty })}
-        placeholderThreeFunc={(amount) => setNote({ ...note, price: +amount })}
-        buttonOneLabel="Change"
-        buttonFuncOne={() => updateNote()}
-        buttonFuncTwo={() => setEditVisible(!isEditVisible)}
-      /> */}
-
-      <ModalContainer
-        isDialogVisible={isEditVisible}
-        title="Change Note"
-        item={(title) => setNote({ ...note, title: title })}
-        qty={(qty) => setNote({ ...note, qty: qty })}
-        price={(price) => setNote({ ...note, price: +price })}
-        buttonTitleOne="Change"
-        buttonFuncOne={() => updateNote()}
-        buttonTitleTwo="Cancel"
-        buttonFuncTwo={() => setEditVisible(!isEditVisible)}
-      />
-      {/*//! zipcode box*/}
-      {/* <DialogZipContainer
-        zipDialog={zipDialog}
-        zipFunc={(zipCode) => setZip(zipCode)}
-        zipCancel={() => setZipDialog(!zipDialog)}
-        zipEnter={checkZip}
-      /> */}
-      <ModalZipContainer
-        zipDialog={zipDialog}
-        zipInput={(zipCode) => setZip(zipCode)}
-        zipFuncCancel={() => setZipDialog(!zipDialog)}
-        zipGetZipCode={checkZip}
-      />
-
+      {renderDialog()}
       {/*//! add button to create notes*/}
       <AddIcon onPress={() => toggle()} />
       {/*//! modal*/}
