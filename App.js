@@ -1,28 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import './global.css';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Alert, Modal, TextInput } from 'react-native';
-import { s } from './App.style';
-import { Icons } from './components/Icons/Icons';
-import { Food } from './components/Food/Food';
-import { AddIcon } from './components/AddIcon';
-import { useState, useEffect } from 'react';
-import uuid from 'react-native-uuid';
-import { data } from './components/FakeData';
+import { StatusBar } from "expo-status-bar";
+import "./global.css";
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  Modal,
+  TextInput,
+} from "react-native";
+import { s } from "./App.style";
+import { Icons } from "./components/Icons/Icons";
+import { Food } from "./components/Food/Food";
+import { AddIcon } from "./components/AddIcon";
+import { useState, useEffect } from "react";
+import uuid from "react-native-uuid";
+import { data } from "./components/FakeData";
 import Dialog from "react-native-dialog";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { TouchableOpacity } from 'react-native';
-import { ModalComponent } from './components/Modal';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { TouchableOpacity } from "react-native";
+import { ModalComponent } from "./components/Modal";
 import ModalContainer from "./components/ModalContainer";
-
-
+import ModalZipContainer from "./components/ModalZipContainer";
+import DialogContainer from "./components/DialogContainer";
+import DialogZipContainer from "./components/DialogZipContainer";
 
 let isFirstRender = true;
 
-
-
 export default function App() {
-
   const [salesTax, setSalesTax] = useState(0);
   const [modal, setModal] = useState(false);
   const [noteArray, setNoteArray] = useState([]); //?comes from local storage
@@ -32,14 +39,13 @@ export default function App() {
   const [note, setNote] = useState({
     id: "",
     title: "",
-    price: 0.00,
-    qty: 0
+    price: 0.0,
+    qty: 0,
   });
   const [isEditVisible, setEditVisible] = useState(false);
 
   useEffect(() => {
     loadNotes();
-
   }, []);
 
   useEffect(() => {
@@ -50,9 +56,7 @@ export default function App() {
     }
   }, [noteArray, salesTax]);
 
-
   const loadNotes = async () => {
-
     try {
       const notes = await AsyncStorage.getItem("@notes");
       const parsedNotes = JSON.parse(notes);
@@ -61,14 +65,11 @@ export default function App() {
 
       setNoteArray(parsedNotes || []);
       setSalesTax(parsedTax || 0);
-
-
     } catch (err) {
       alert(err);
     }
   };
   const saveNotes = async () => {
-
     try {
       await AsyncStorage.setItem("@notes", JSON.stringify(noteArray));
       await AsyncStorage.setItem("@salestax", JSON.stringify(salesTax));
@@ -78,15 +79,14 @@ export default function App() {
   };
 
   const options = {
-    method: 'GET',
+    method: "GET",
     url: `https://retrieveustaxrate.p.rapidapi.com/GetTaxRateByZip?zip=${zip}`,
     headers: {
-      'x-rapidapi-key': 'fc253d3d50msh904d92d7fca9a2cp10a84cjsnf485d1c60b91',
-      'x-rapidapi-host': 'retrieveustaxrate.p.rapidapi.com',
-      Authorization: 'Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw=='
-    }
+      "x-rapidapi-key": "fc253d3d50msh904d92d7fca9a2cp10a84cjsnf485d1c60b91",
+      "x-rapidapi-host": "retrieveustaxrate.p.rapidapi.com",
+      Authorization: "Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw==",
+    },
   };
-
 
   async function getZipAPI() {
     try {
@@ -101,22 +101,18 @@ export default function App() {
     if (zip.length === 5) {
       getZipAPI();
       setZipDialog(!zipDialog);
-
     } else {
-      Alert.alert(
-        "Warning",
-        "Please Check Zip Code",
-        [
-          {
-            text: "Okay"
-          }
-        ]
-      );
+      Alert.alert("Warning", "Please Check Zip Code", [
+        {
+          text: "Okay",
+        },
+      ]);
     }
   };
 
-
-  {/*//! Toggles dialog input box*/ }
+  {
+    /*//! Toggles dialog input box*/
+  }
   const toggle = () => {
     if (!salesTax) {
       setModal(true);
@@ -134,61 +130,54 @@ export default function App() {
       setNote({
         id: "",
         title: "",
-        price: 0.00,
-        qty: 0
+        price: 0.0,
+        qty: 0,
       });
     }
   };
 
-
   const deleteAllNotes = () => {
-
     const removeAsyncStorage = async () => {
       try {
         await AsyncStorage.removeItem("@notes");
         await AsyncStorage.removeItem("@salestax");
-        setNoteArray(noteArray.filter(x => x.id === 0));
+        setNoteArray(noteArray.filter((x) => x.id === 0));
         setSalesTax(0);
       } catch (err) {
         console.log(err);
       }
     };
 
-
-    Alert.alert(
-      "Warning",
-      "This action will remove all notes!!",
-      [
-        {
-          text: "Remove All", style: "destructive", onPress: () => removeAsyncStorage()
-        },
-        {
-          text: "Cancel"
-        }
-      ]
-    );
+    Alert.alert("Warning", "This action will remove all notes!!", [
+      {
+        text: "Remove All",
+        style: "destructive",
+        onPress: () => removeAsyncStorage(),
+      },
+      {
+        text: "Cancel",
+      },
+    ]);
   };
 
-
   const getTotal = () => {
-
-    const total = noteArray.reduce((acc, cv) => {
-      return cv.qty ? acc + (cv.price * cv.qty) : acc + cv.price;
-    }, 0) * salesTax;
+    const total =
+      noteArray.reduce((acc, cv) => {
+        return cv.qty ? acc + cv.price * cv.qty : acc + cv.price;
+      }, 0) * salesTax;
 
     return total.toFixed(2);
-
   };
 
   const deleteNote = (note) => {
-    Alert.alert(
-      "Delete Note",
-      "Are your sure your want to delete?",
-      [
-        { text: "Remove Note", style: "destructive", onPress: () => setNoteArray(noteArray.filter(x => x.id !== note.id)) },
-        { text: "Cancel" }
-      ]
-    );
+    Alert.alert("Delete Note", "Are your sure your want to delete?", [
+      {
+        text: "Remove Note",
+        style: "destructive",
+        onPress: () => setNoteArray(noteArray.filter((x) => x.id !== note.id)),
+      },
+      { text: "Cancel" },
+    ]);
   };
 
   const handleEditBox = (n) => {
@@ -197,7 +186,7 @@ export default function App() {
       id: n.id,
       title: n.title,
       price: n.price,
-      qty: n.qty
+      qty: n.qty,
     });
   };
 
@@ -207,8 +196,7 @@ export default function App() {
   };
 
   const updateNote = () => {
-
-    const newNotes = noteArray.map(n => n.id === note.id ? note : n);
+    const newNotes = noteArray.map((n) => (n.id === note.id ? note : n));
 
     setNoteArray(newNotes);
 
@@ -217,18 +205,20 @@ export default function App() {
     setNote({
       id: "",
       title: "",
-      price: 0.00,
-      qty: 0
+      price: 0.0,
+      qty: 0,
     });
   };
 
-
   return (
-
     <SafeAreaView style={s.root}>
-      <Icons arr={getTotal()} onPress={() => deleteAllNotes()} onPressDialog={() => setZipDialog(!zipDialog)} />
+      <Icons
+        arr={getTotal()}
+        onPress={() => deleteAllNotes()}
+        onPressDialog={() => setZipDialog(!zipDialog)}
+      />
       <ScrollView>
-        {noteArray.map(note =>
+        {noteArray.map((note) => (
           <Food
             key={note.id}
             food={note.title}
@@ -236,104 +226,72 @@ export default function App() {
             qty={note.qty}
             onLongPress={() => deleteNote(note)}
             onPress={() => showEditBox(note)}
-          />)}
+          />
+        ))}
       </ScrollView>
       {/*//! Add a note container*/}
-      {/* <Dialog.Container visible={isDialogVisible}>
-        <Dialog.Title>Add Note</Dialog.Title>
-        <Dialog.Input autoCapitalize="none" placeholder='Name of Item...' onChangeText={(txt) => setNote({ ...note, title: txt })} />
-        <Dialog.Input placeholder='Quantity' onChangeText={(qty) => setNote({ ...note, qty: qty })} />
-        <Dialog.Input inputMode='decimal' placeholder='Price' onChangeText={(amount) => setNote({ ...note, price: +amount })} />
-        <Dialog.Button label="Add" onPress={() => addNote()} />
-        <Dialog.Button label="Cancel" onPress={() => toggle()} />
-      </Dialog.Container> */}
-      <Modal visible={isDialogVisible} transparent={true} animationType="fade">
-        <View className='flex-1 items-center justify-center bg-black opacity-70'>
-          <View className='w-96 bg-white rounded-md'>
-            <Text className='text-center text-2xl underline'>Add Note</Text>
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Name of Item" onChangeText={(txt) => setNote({ ...note, title: txt })} />
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Quantity" keyboardType="numeric" onChangeText={(qty) => setNote({ ...note, qty: qty })} />
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Price" keyboardType="decimal-pad" onChangeText={(price) => setNote({ ...note, price: price })} />
-          </View>
-          <View className='flex-row gap-2 mt-2'>
-            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => addNote()}>
-              <Text>Add</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={() => toggle()}>
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* <DialogContainer
+        isDialogVisible={isDialogVisible}
+        title="Add Note"
+        placeholderOneFunc={(txt) => setNote({ ...note, title: txt })}
+        placeholderTwoFunc={(qty) => setNote({ ...note, qty: qty })}
+        placeholderThreeFunc={(amount) => setNote({ ...note, price: +amount })}
+        buttonOneLabel="Add"
+        buttonFuncOne={() => addNote()}
+        buttonFuncTwo={() => toggle()}
+      /> */}
+      <ModalContainer
+        isDialogVisible={isDialogVisible}
+        title="Add Note"
+        item={(txt) => setNote({ ...note, title: txt })}
+        qty={(qty) => setNote({ ...note, qty: qty })}
+        price={(price) => setNote({ ...note, price: +price })}
+        buttonTitleOne="Add"
+        buttonFuncOne={() => addNote()}
+        buttonTitleTwo="Cancel"
+        buttonFuncTwo={() => toggle()}
+      />
       {/*//! Edit Dialog Box*/}
-      {/* <Dialog.Container visible={isEditVisible}>
-        <Dialog.Title>Change Note</Dialog.Title>
-        <Dialog.Input autoCapitalize="none" placeholder='Name...' onChangeText={(txt) => setNote({ ...note, title: txt })} />
-        <Dialog.Input placeholder='Quantity' onChangeText={(qty) => setNote({ ...note, qty: qty })} />
-        <Dialog.Input inputMode='decimal' placeholder='Price' onChangeText={(amount) => setNote({ ...note, price: +amount })} />
-        <Dialog.Button label="Update" onPress={() => updateNote()} />
-        <Dialog.Button label="Cancel" onPress={() => setEditVisible(!isEditVisible)} />
-      </Dialog.Container> */}
-      <Modal visible={isEditVisible} transparent={true} animationType="fade">
-        <View className='flex-1 items-center justify-center bg-black opacity-70'>
-          <View className='w-96 bg-white rounded-md'>
-            <Text className='text-center text-2xl underline'>Change Note</Text>
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Name..." onChangeText={(txt) => setNote({ ...note, title: txt })} />
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Quantity" keyboardType="numeric" onChangeText={(qty) => setNote({ ...note, qty: qty })} />
-            <TextInput className='border-b p-2 outline-none border-black' placeholder="Price" keyboardType="decimal-pad" onChangeText={(price) => setNote({ ...note, price: +price })} />
-          </View>
-          <View className='flex-row gap-2 mt-2'>
-            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => updateNote()}>
-              <Text>Add</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={() => setEditVisible(!isEditVisible)}>
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* <DialogContainer
+        isDialogVisible={isEditVisible}
+        title="Add Note"
+        placeholderOneFunc={(txt) => setNote({ ...note, title: txt })}
+        placeholderTwoFunc={(qty) => setNote({ ...note, qty: qty })}
+        placeholderThreeFunc={(amount) => setNote({ ...note, price: +amount })}
+        buttonOneLabel="Change"
+        buttonFuncOne={() => updateNote()}
+        buttonFuncTwo={() => setEditVisible(!isEditVisible)}
+      /> */}
+
+      <ModalContainer
+        isDialogVisible={isEditVisible}
+        title="Change Note"
+        item={(title) => setNote({ ...note, title: title })}
+        qty={(qty) => setNote({ ...note, qty: qty })}
+        price={(price) => setNote({ ...note, price: +price })}
+        buttonTitleOne="Change"
+        buttonFuncOne={() => updateNote()}
+        buttonTitleTwo="Cancel"
+        buttonFuncTwo={() => setEditVisible(!isEditVisible)}
+      />
       {/*//! zipcode box*/}
-      {/* <Dialog.Container visible={zipDialog}>
-        <Dialog.Title>Enter Zip Code</Dialog.Title>
-        <Dialog.Input
-          placeholder='Zip Code ex:90210'
-          keyboardType='numeric'
-          maxLength={5}
-          onChangeText={(zipCode) => setZip(zipCode)}
-        />
-        <Dialog.Button label="Cancel" onPress={() => setZipDialog(!zipDialog)} />
-        <Dialog.Button label="Enter" onPress={checkZip}
-        />
-      </Dialog.Container> */}
-      <Modal visible={zipDialog} transparent={true} animationType="fade">
-        <View className='flex-1 items-center justify-center bg-black opacity-70'>
-          <View className='w-96 bg-white rounded-md'>
-            <Text className='text-center text-2xl underline'>Enter Zip Code</Text>
-            <TextInput keyboardType="numeric" maxLength={5} className='border-b p-2 outline-none border-black' placeholder="Zip Code" onChangeText={(zipCode) => setZip(zipCode)} />
-          </View>
-          <View className='flex-row gap-2 mt-2'>
-            <TouchableOpacity className='bg-emerald-500 rounded-md p-2' onPress={() => setZipDialog(!zipDialog)}>
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className='bg-violet-500 rounded-md p-2' onPress={checkZip}>
-              <Text>Enter</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* <DialogZipContainer
+        zipDialog={zipDialog}
+        zipFunc={(zipCode) => setZip(zipCode)}
+        zipCancel={() => setZipDialog(!zipDialog)}
+        zipEnter={checkZip}
+      /> */}
+      <ModalZipContainer
+        zipDialog={zipDialog}
+        zipInput={(zipCode) => setZip(zipCode)}
+        zipFuncCancel={() => setZipDialog(!zipDialog)}
+        zipGetZipCode={checkZip}
+      />
 
       {/*//! add button to create notes*/}
       <AddIcon onPress={() => toggle()} />
       {/*//! modal*/}
       <ModalComponent show={modal} btn={() => setModal(!modal)} />
     </SafeAreaView>
-
   );
-
-
 }
-
-
-
-
-
