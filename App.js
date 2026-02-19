@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   ScrollView,
   Alert,
   Modal,
@@ -12,8 +11,8 @@ import {
   Platform,
 } from "react-native";
 import { s } from "./App.style";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Icons } from "./components/Icons/Icons";
-import { Food } from "./components/Food/Food";
 import { AddIcon } from "./components/AddIcon";
 import { useState, useEffect } from "react";
 import uuid from "react-native-uuid";
@@ -21,14 +20,14 @@ import { data } from "./components/FakeData";
 import Dialog from "react-native-dialog";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { TouchableOpacity } from "react-native";
 import { ModalComponent } from "./components/Modal";
 import ModalContainer from "./components/ModalContainer";
 import ModalZipContainer from "./components/ModalZipContainer";
 import DialogContainer from "./components/DialogContainer";
 import DialogZipContainer from "./components/DialogZipContainer";
+import FoodWeb from "./components/Food/FoodWeb";
+import FoodMobile from "./components/Food/FoodMobile";
 import Swal from "sweetalert2";
-import DeleteAllNotesModal from "./components/DeleteAllNotesModal";
 
 let isFirstRender = true;
 
@@ -166,7 +165,22 @@ export default function App() {
         },
       ]);
     } else {
-      setDeleteModal(true);
+      Swal.fire({
+        title: "Are you sure?",
+        text: "All Notes Will Be Deleted!",
+        icon: "warning",
+        background: "#34495E",
+        color: "white",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#F9E79F",
+        confirmButtonText: "Delete All Notes",
+        backdrop: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          removeAsyncStorage();
+        }
+      });
     }
   };
 
@@ -180,14 +194,35 @@ export default function App() {
   };
 
   const deleteNote = (note) => {
-    Alert.alert("Delete Note", "Are your sure your want to delete?", [
-      {
-        text: "Remove Note",
-        style: "destructive",
-        onPress: () => setNoteArray(noteArray.filter((x) => x.id !== note.id)),
-      },
-      { text: "Cancel" },
-    ]);
+    const updatedNotes = noteArray.filter((x) => x.id !== note.id);
+
+    if (Platform.OS !== "web") {
+      Alert.alert("Delete Note", "Are your sure your want to delete?", [
+        {
+          text: "Remove Note",
+          style: "destructive",
+          onPress: () => setNoteArray(updatedNotes),
+        },
+        { text: "Cancel" },
+      ]);
+    } else {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Note Will Be Deleted!",
+        icon: "warning",
+        background: "#34495E",
+        color: "white",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#F9E79F",
+        confirmButtonText: "Delete Note",
+        backdrop: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setNoteArray(updatedNotes);
+        }
+      });
+    }
   };
 
   const handleEditBox = (n) => {
@@ -283,40 +318,54 @@ export default function App() {
             zipFuncCancel={() => setZipDialog(!zipDialog)}
             zipGetZipCode={checkZip}
           />
-          <DeleteAllNotesModal
-            show={deleteModal}
-            delete={removeAsyncStorage}
-            cancel={() => setDeleteModal(false)}
-          />
         </>
       );
     }
   };
 
-  return (
-    <SafeAreaView style={s.root}>
-      <Icons
-        arr={getTotal()}
-        onPress={() => deleteAllNotes()}
-        onPressDialog={() => setZipDialog(!zipDialog)}
-      />
-      <ScrollView>
-        {noteArray.map((note) => (
-          <Food
+  const renderFood = () => {
+    if (Platform.OS !== "web") {
+      return noteArray.map((note) => (
+        <FoodMobile
+          key={note.id}
+          food={note.title}
+          price={note.price}
+          qty={note.qty}
+          onLongPress={() => deleteNote(note)}
+          onPress={() => showEditBox(note)}
+        />
+      ));
+    } else {
+      return noteArray.map((note) => {
+        return (
+          <FoodWeb
             key={note.id}
             food={note.title}
             price={note.price}
             qty={note.qty}
-            onLongPress={() => deleteNote(note)}
-            onPress={() => showEditBox(note)}
+            delete={() => deleteNote(note)}
+            edit={() => showEditBox(note)}
           />
-        ))}
-      </ScrollView>
-      {renderDialog()}
-      {/*//! add button to create notes*/}
-      <AddIcon onPress={() => toggle()} />
-      {/*//! modal*/}
-      <ModalComponent show={modal} btn={() => setModal(!modal)} />
-    </SafeAreaView>
+        );
+      });
+    }
+  };
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={s.root}>
+        <Icons
+          arr={getTotal()}
+          onPress={() => deleteAllNotes()}
+          onPressDialog={() => setZipDialog(!zipDialog)}
+        />
+        <ScrollView>{renderFood()}</ScrollView>
+        {renderDialog()}
+        {/*//! add button to create notes*/}
+        <AddIcon onPress={() => toggle()} />
+        {/*//! modal*/}
+        <ModalComponent show={modal} btn={() => setModal(!modal)} />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }

@@ -13,7 +13,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rach18731943.expense-app"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,9 +33,7 @@
       }
     },
     "owner": "rach18731943",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/81313632-102f-4d0b-89b6-4557efdefa5c"
     }
