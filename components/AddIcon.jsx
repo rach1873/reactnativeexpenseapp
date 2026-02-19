@@ -1,10 +1,11 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+// import { AntDesign } from "@expo/vector-icons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export const AddIcon = (props) => {
   return (
     <TouchableOpacity style={s.root} onPress={props.onPress}>
-      <AntDesign name="pluscircle" size={45} color="#2ECC71" />
+      <AntDesign name="plus" size={45} color="#2ECC71" />
     </TouchableOpacity>
   );
 };
