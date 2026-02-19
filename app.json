@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "expense",
-    "slug": "expense-app",
+    "slug": "expenseapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#F9E79F"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rach18731943.expense-app"
@@ -26,10 +28,12 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-font"],
+    "plugins": [
+      "expo-font"
+    ],
     "extra": {
       "eas": {
-        "projectId": "81313632-102f-4d0b-89b6-4557efdefa5c"
+        "projectId": "3074fc14-71b6-4771-8a13-7620106ef33e"
       }
     },
     "owner": "rach18731943",
